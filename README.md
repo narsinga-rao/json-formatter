@@ -32,6 +32,15 @@ mvn clean package
 
 ### Running the Application
 
+#### Quick Start (Recommended)
+```bash
+# On Linux/Mac
+./run.sh
+
+# On Windows
+run.bat
+```
+
 #### Option 1: Using Maven
 ```bash
 mvn spring-boot:run
@@ -60,7 +69,7 @@ mvn javafx:run
 
 ## Example JSON
 
-Try pasting this sample JSON:
+Try pasting this sample JSON (also available in `example.json`):
 ```json
 {
   "name": "John Doe",
@@ -78,6 +87,8 @@ Try pasting this sample JSON:
   "skills": ["Java", "Spring Boot", "JavaFX"]
 }
 ```
+
+For more complex examples, see the included `example.json` file.
 
 ## Project Structure
 ```

@@ -1,0 +1,54 @@
+{
+  "application": "JSON Formatter",
+  "version": "1.0.0",
+  "description": "A desktop application for formatting and visualizing JSON data",
+  "features": {
+    "input": "Text area with syntax-friendly monospaced font",
+    "output": "Collapsible and expandable tree view",
+    "buttons": ["Format", "Clear"],
+    "errorHandling": true
+  },
+  "techStack": {
+    "ui": "JavaFX",
+    "backend": "Spring Boot",
+    "jsonProcessing": "Jackson",
+    "buildTool": "Maven"
+  },
+  "developers": [
+    {
+      "name": "Development Team",
+      "role": "Full Stack",
+      "skills": ["Java", "JavaFX", "Spring Boot"]
+    }
+  ],
+  "stats": {
+    "linesOfCode": 500,
+    "testCoverage": 95.5,
+    "active": true,
+    "lastUpdated": "2026-02-06"
+  },
+  "supportedTypes": {
+    "primitives": ["string", "number", "boolean", "null"],
+    "complex": ["object", "array"]
+  },
+  "sampleData": {
+    "string": "Hello, World!",
+    "number": 42,
+    "floatingPoint": 3.14159,
+    "boolean": true,
+    "nullValue": null,
+    "array": [1, 2, 3, 4, 5],
+    "nestedArray": [
+      [1, 2],
+      [3, 4],
+      [5, 6]
+    ],
+    "nestedObject": {
+      "level1": {
+        "level2": {
+          "level3": "Deep nesting supported"
+        }
+      }
+    }
+  }
+}
