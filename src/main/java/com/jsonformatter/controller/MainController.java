@@ -10,13 +10,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 /**
  * Main controller for the JSON Formatter UI.
+ * Note: This is NOT a Spring component because it creates JavaFX UI components
+ * which require the JavaFX toolkit to be initialized first.
  */
-@Component
 public class MainController {
 
     private final JsonParserService jsonParserService;
@@ -25,7 +23,6 @@ public class MainController {
     private TreeView<String> jsonTreeView;
     private Label statusLabel;
 
-    @Autowired
     public MainController(JsonParserService jsonParserService) {
         this.jsonParserService = jsonParserService;
         initializeUI();

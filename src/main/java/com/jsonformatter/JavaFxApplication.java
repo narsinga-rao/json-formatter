@@ -1,6 +1,7 @@
 package com.jsonformatter;
 
 import com.jsonformatter.controller.MainController;
+import com.jsonformatter.service.JsonParserService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -22,7 +23,12 @@ public class JavaFxApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            MainController mainController = springContext.getBean(MainController.class);
+            // Get the JsonParserService from Spring context
+            JsonParserService jsonParserService = springContext.getBean(JsonParserService.class);
+            
+            // Create MainController manually (after JavaFX toolkit is initialized)
+            MainController mainController = new MainController(jsonParserService);
+            
             Scene scene = new Scene(mainController.getView(), 1200, 700);
             
             primaryStage.setTitle("JSON Formatter");
