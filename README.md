@@ -2,6 +2,9 @@
 
 A desktop application to format JSON payloads and display them as collapsible and expandable nodes.
 
+> **⚠️ IMPORTANT:** If you're getting "Toolkit not initialized" error, you must rebuild the application!
+> See [REBUILD_INSTRUCTIONS.md](REBUILD_INSTRUCTIONS.md) for details.
+
 ## Tech Stack
 - **UI:** JavaFX
 - **Backend:** Java with Spring Boot
@@ -24,10 +27,15 @@ A desktop application to format JSON payloads and display them as collapsible an
 
 ### Building the Application
 ```bash
-# Clean and package the application
+# IMPORTANT: Always use 'clean' to remove old compiled classes
 mvn clean package
 
 # This will create a JAR file in the target/ directory
+```
+
+> **⚠️ Why 'clean' is important:** If you previously built an older version of the code,
+> old compiled classes may remain in the `target/` directory. Always use `mvn clean package`
+> to ensure a fresh build, especially after pulling new changes.
 ```
 
 ### Running the Application
