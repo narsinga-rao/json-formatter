@@ -101,12 +101,17 @@ json-formatter/
 │                   ├── JsonFormatterApplication.java  # Spring Boot main class
 │                   ├── JavaFxApplication.java         # JavaFX application
 │                   ├── controller/
-│                   │   └── MainController.java        # UI controller
+│                   │   └── MainController.java        # UI controller (created after JavaFX init)
 │                   └── service/
-│                       └── JsonParserService.java     # JSON parsing service
+│                       └── JsonParserService.java     # JSON parsing service (@Service)
 ├── pom.xml                                            # Maven configuration
 └── README.md                                          # This file
 ```
+
+## Architecture Notes
+- **JsonParserService**: Spring-managed service (@Service) for JSON processing
+- **MainController**: Regular Java class (not a Spring bean) created after JavaFX toolkit initialization
+- **JavaFX Integration**: MainController is instantiated manually in JavaFxApplication.start() to ensure JavaFX toolkit is initialized before creating UI components
 
 ## Dependencies
 - Spring Boot Starter 2.7.14
@@ -118,6 +123,11 @@ json-formatter/
 - Invalid JSON syntax triggers an alert dialog with specific error details
 - Status bar at the bottom shows current operation status and errors
 - Error messages are displayed in red in the status bar
+
+## Troubleshooting
+- If you encounter "Toolkit not initialized" error, ensure you're using the latest version
+- The application requires a graphical display to run
+- For headless environments, JavaFX will report "Unable to open DISPLAY" (expected behavior)
 
 ## License
 This project is open source and available under the MIT License.
