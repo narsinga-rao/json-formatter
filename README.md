@@ -41,6 +41,8 @@ mvn clean package
 ### Running the Application
 
 #### Quick Start (Recommended)
+The run scripts now automatically rebuild the application to ensure you always have the latest code:
+
 ```bash
 # On Linux/Mac
 ./run.sh
@@ -48,6 +50,15 @@ mvn clean package
 # On Windows
 run.bat
 ```
+
+> **✨ New Feature**: The run scripts now **always rebuild** the application by default.
+> This ensures you're running the latest code and prevents stale JAR issues.
+> 
+> **Performance Tip**: If you haven't made any code changes and want to skip the rebuild:
+> ```bash
+> ./run.sh --skip-build     # Linux/Mac
+> run.bat --skip-build      # Windows
+> ```
 
 #### Option 1: Using Maven
 ```bash
