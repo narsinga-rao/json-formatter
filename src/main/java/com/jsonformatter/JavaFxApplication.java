@@ -1,0 +1,53 @@
+package com.jsonformatter;
+
+import com.jsonformatter.controller.MainController;
+import com.jsonformatter.service.JsonParserService;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import org.springframework.context.ConfigurableApplicationContext;
+
+/**
+ * JavaFX Application that integrates with Spring Boot.
+ */
+public class JavaFxApplication extends Application {
+
+    private ConfigurableApplicationContext springContext;
+
+    @Override
+    public void init() {
+        springContext = JsonFormatterApplication.getApplicationContext();
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        try {
+            // Get the JsonParserService from Spring context
+            JsonParserService jsonParserService = springContext.getBean(JsonParserService.class);
+            
+            // Create MainController manually (after JavaFX toolkit is initialized)
+            MainController mainController = new MainController(jsonParserService);
+            
+            Scene scene = new Scene(mainController.getView(), 1200, 700);
+            
+            primaryStage.setTitle("JSON Formatter");
+            primaryStage.setScene(scene);
+            primaryStage.setOnCloseRequest(event -> {
+                Platform.exit();
+                System.exit(0);
+            });
+            primaryStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void stop() {
+        if (springContext != null) {
+            springContext.close();
+        }
+        Platform.exit();
+    }
+}
