@@ -67,11 +67,12 @@ public class JsonParserService {
         TreeItem<String> treeItem;
 
         if (jsonNode.isObject()) {
-            // Object node - display as key-value pairs
-            treeItem = new TreeItem<>(name + " { }");
+            // Object node - display key-value pairs within { } with item count
+            ObjectNode objectNode = (ObjectNode) jsonNode;
+            int fieldCount = objectNode.size();
+            treeItem = new TreeItem<>(name + " {" + fieldCount + "}");
             treeItem.setExpanded(true);
             
-            ObjectNode objectNode = (ObjectNode) jsonNode;
             Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
             
             while (fields.hasNext()) {
@@ -82,11 +83,12 @@ public class JsonParserService {
                 treeItem.getChildren().add(childItem);
             }
         } else if (jsonNode.isArray()) {
-            // Array node - display with indices
-            treeItem = new TreeItem<>(name + " [ ]");
+            // Array node - display within [ ] with item count
+            ArrayNode arrayNode = (ArrayNode) jsonNode;
+            int elementCount = arrayNode.size();
+            treeItem = new TreeItem<>(name + " [" + elementCount + "]");
             treeItem.setExpanded(true);
             
-            ArrayNode arrayNode = (ArrayNode) jsonNode;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode element = arrayNode.get(i);
                 TreeItem<String> childItem = buildTreeFromJson(element, "[" + i + "]");
