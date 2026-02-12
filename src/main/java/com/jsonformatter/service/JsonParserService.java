@@ -67,14 +67,21 @@ public class JsonParserService {
         TreeItem<String> treeItem;
 
         if (jsonNode.isObject()) {
-            // Object node - display key-value pairs within { } with item count
+            // Object node - display key-value pairs within { }
             ObjectNode objectNode = (ObjectNode) jsonNode;
             int fieldCount = objectNode.size();
-            treeItem = new TreeItem<>(name + " {" + fieldCount + "}");
+            String expandedLabel = name;
+            String collapsedLabel = name + ": { " + fieldCount + " props }";
+            treeItem = new TreeItem<>(expandedLabel);
             treeItem.setExpanded(true);
-            
+
+            // Toggle label on expand/collapse
+            treeItem.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                treeItem.setValue(isExpanded ? expandedLabel : collapsedLabel);
+            });
+
             Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
-            
+
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 String key = field.getKey();
@@ -83,12 +90,19 @@ public class JsonParserService {
                 treeItem.getChildren().add(childItem);
             }
         } else if (jsonNode.isArray()) {
-            // Array node - display within [ ] with item count
+            // Array node - display within [ ]
             ArrayNode arrayNode = (ArrayNode) jsonNode;
             int elementCount = arrayNode.size();
-            treeItem = new TreeItem<>(name + " [" + elementCount + "]");
+            String expandedLabel = name;
+            String collapsedLabel = name + ": [ " + elementCount + " items ]";
+            treeItem = new TreeItem<>(expandedLabel);
             treeItem.setExpanded(true);
-            
+
+            // Toggle label on expand/collapse
+            treeItem.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                treeItem.setValue(isExpanded ? expandedLabel : collapsedLabel);
+            });
+
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode element = arrayNode.get(i);
                 TreeItem<String> childItem = buildTreeFromJson(element, "[" + i + "]");

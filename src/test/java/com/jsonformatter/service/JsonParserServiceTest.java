@@ -69,7 +69,8 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        assertEquals("root {2}", treeItem.getValue());
+        // When expanded, label is just the name
+        assertEquals("root", treeItem.getValue());
         assertEquals(2, treeItem.getChildren().size());
     }
 
@@ -81,7 +82,8 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        assertEquals("root [3]", treeItem.getValue());
+        // When expanded, label is just the name
+        assertEquals("root", treeItem.getValue());
         assertEquals(3, treeItem.getChildren().size());
         assertEquals("[0]: 1", treeItem.getChildren().get(0).getValue());
         assertEquals("[1]: 2", treeItem.getChildren().get(1).getValue());
@@ -96,11 +98,12 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        assertEquals("root {1}", treeItem.getValue());
+        // When expanded, label is just the name
+        assertEquals("root", treeItem.getValue());
         assertEquals(1, treeItem.getChildren().size());
         
         TreeItem<String> personItem = treeItem.getChildren().get(0);
-        assertEquals("person {2}", personItem.getValue());
+        assertEquals("person", personItem.getValue());
         assertEquals(2, personItem.getChildren().size());
     }
 
@@ -142,20 +145,21 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        assertEquals("root {1}", treeItem.getValue());
+        // When expanded, label is just the name
+        assertEquals("root", treeItem.getValue());
         assertEquals(1, treeItem.getChildren().size());
         
         TreeItem<String> usersItem = treeItem.getChildren().get(0);
-        assertEquals("users [2]", usersItem.getValue());
+        assertEquals("users", usersItem.getValue());
         assertEquals(2, usersItem.getChildren().size());
         
         TreeItem<String> firstUser = usersItem.getChildren().get(0);
-        assertEquals("[0] {2}", firstUser.getValue());
+        assertEquals("[0]", firstUser.getValue());
         assertEquals(2, firstUser.getChildren().size());
     }
 
     @Test
-    void testObjectNodesAreExpandable() throws JsonProcessingException {
+    void testObjectNodesAreExpandedByDefault() throws JsonProcessingException {
         String json = "{\"name\":\"John\",\"address\":{\"city\":\"NYC\"}}";
         JsonNode jsonNode = jsonParserService.parseJson(json);
 
@@ -163,38 +167,90 @@ class JsonParserServiceTest {
 
         // Root object node should be expanded
         assertTrue(treeItem.isExpanded(), "Root object node should be expanded");
+        assertEquals("root", treeItem.getValue());
 
         // Nested object node should be expanded
         TreeItem<String> addressItem = treeItem.getChildren().get(1);
-        assertEquals("address {1}", addressItem.getValue());
+        assertEquals("address", addressItem.getValue());
         assertTrue(addressItem.isExpanded(), "Nested object node should be expanded");
     }
 
     @Test
-    void testArrayNodesAreExpandable() throws JsonProcessingException {
+    void testArrayNodesAreExpandedByDefault() throws JsonProcessingException {
         String json = "{\"items\":[\"a\",\"b\",\"c\"]}";
         JsonNode jsonNode = jsonParserService.parseJson(json);
 
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
         TreeItem<String> arrayItem = treeItem.getChildren().get(0);
-        assertEquals("items [3]", arrayItem.getValue());
+        assertEquals("items", arrayItem.getValue());
         assertTrue(arrayItem.isExpanded(), "Array node should be expanded");
     }
 
     @Test
-    void testItemCountInObjectAndArrayLabels() throws JsonProcessingException {
-        String json = "{\"a\":1,\"b\":2,\"c\":3,\"list\":[10,20]}";
+    void testObjectLabelChangesOnCollapse() throws JsonProcessingException {
+        String json = "{\"a\":1,\"b\":2,\"c\":3}";
         JsonNode jsonNode = jsonParserService.parseJson(json);
 
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
-        // Root object has 4 fields
-        assertEquals("root {4}", treeItem.getValue());
+        // Initially expanded - label is just the name
+        assertEquals("root", treeItem.getValue());
 
-        // Find the array child
-        TreeItem<String> listItem = treeItem.getChildren().get(3);
-        assertEquals("list [2]", listItem.getValue());
+        // Collapse the node - label should show prop count
+        treeItem.setExpanded(false);
+        assertEquals("root: { 3 props }", treeItem.getValue());
+
+        // Expand again - label goes back to name
+        treeItem.setExpanded(true);
+        assertEquals("root", treeItem.getValue());
+    }
+
+    @Test
+    void testArrayLabelChangesOnCollapse() throws JsonProcessingException {
+        String json = "[1,2,3,4,5]";
+        JsonNode jsonNode = jsonParserService.parseJson(json);
+
+        TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
+
+        // Initially expanded - label is just the name
+        assertEquals("root", treeItem.getValue());
+
+        // Collapse the node - label should show item count
+        treeItem.setExpanded(false);
+        assertEquals("root: [ 5 items ]", treeItem.getValue());
+
+        // Expand again - label goes back to name
+        treeItem.setExpanded(true);
+        assertEquals("root", treeItem.getValue());
+    }
+
+    @Test
+    void testNestedObjectLabelChangesOnCollapse() throws JsonProcessingException {
+        String json = "{\"person\":{\"name\":\"John\",\"age\":30}}";
+        JsonNode jsonNode = jsonParserService.parseJson(json);
+
+        TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
+
+        TreeItem<String> personItem = treeItem.getChildren().get(0);
+        assertEquals("person", personItem.getValue());
+
+        personItem.setExpanded(false);
+        assertEquals("person: { 2 props }", personItem.getValue());
+    }
+
+    @Test
+    void testNestedArrayLabelChangesOnCollapse() throws JsonProcessingException {
+        String json = "{\"items\":[\"a\",\"b\",\"c\"]}";
+        JsonNode jsonNode = jsonParserService.parseJson(json);
+
+        TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
+
+        TreeItem<String> arrayItem = treeItem.getChildren().get(0);
+        assertEquals("items", arrayItem.getValue());
+
+        arrayItem.setExpanded(false);
+        assertEquals("items: [ 3 items ]", arrayItem.getValue());
     }
 
     @Test
@@ -204,12 +260,19 @@ class JsonParserServiceTest {
 
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
-        assertEquals("root {2}", treeItem.getValue());
+        assertEquals("root", treeItem.getValue());
 
         TreeItem<String> emptyObjItem = treeItem.getChildren().get(0);
-        assertEquals("emptyObj {0}", emptyObjItem.getValue());
+        assertEquals("emptyObj", emptyObjItem.getValue());
 
         TreeItem<String> emptyArrItem = treeItem.getChildren().get(1);
-        assertEquals("emptyArr [0]", emptyArrItem.getValue());
+        assertEquals("emptyArr", emptyArrItem.getValue());
+
+        // Collapse to see counts
+        emptyObjItem.setExpanded(false);
+        assertEquals("emptyObj: { 0 props }", emptyObjItem.getValue());
+
+        emptyArrItem.setExpanded(false);
+        assertEquals("emptyArr: [ 0 items ]", emptyArrItem.getValue());
     }
 }
