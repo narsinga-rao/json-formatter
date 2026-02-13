@@ -65,15 +65,24 @@ public class JsonParserService {
      */
     private TreeItem<String> buildTreeFromJson(JsonNode jsonNode, String name) {
         TreeItem<String> treeItem;
+        String quotedName = quoteKey(name);
 
         if (jsonNode.isObject()) {
-            // Object node - display as key-value pairs
-            treeItem = new TreeItem<>(name + " { }");
-            treeItem.setExpanded(true);
-            
+            // Object node - display key-value pairs within { }
             ObjectNode objectNode = (ObjectNode) jsonNode;
+            int fieldCount = objectNode.size();
+            String expandedLabel = quotedName + ": {";
+            String collapsedLabel = quotedName + ": { " + fieldCount + " props }";
+            treeItem = new TreeItem<>(expandedLabel);
+            treeItem.setExpanded(true);
+
+            // Toggle label on expand/collapse
+            treeItem.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                treeItem.setValue(isExpanded ? expandedLabel : collapsedLabel);
+            });
+
             Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
-            
+
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 String key = field.getKey();
@@ -81,31 +90,55 @@ public class JsonParserService {
                 TreeItem<String> childItem = buildTreeFromJson(value, key);
                 treeItem.getChildren().add(childItem);
             }
+
+            // Add closing brace as last child
+            treeItem.getChildren().add(new TreeItem<>("}"));
         } else if (jsonNode.isArray()) {
-            // Array node - display with indices
-            treeItem = new TreeItem<>(name + " [ ]");
-            treeItem.setExpanded(true);
-            
+            // Array node - display within [ ]
             ArrayNode arrayNode = (ArrayNode) jsonNode;
+            int elementCount = arrayNode.size();
+            String expandedLabel = quotedName + ": [";
+            String collapsedLabel = quotedName + ": [ " + elementCount + " items ]";
+            treeItem = new TreeItem<>(expandedLabel);
+            treeItem.setExpanded(true);
+
+            // Toggle label on expand/collapse
+            treeItem.expandedProperty().addListener((obs, wasExpanded, isExpanded) -> {
+                treeItem.setValue(isExpanded ? expandedLabel : collapsedLabel);
+            });
+
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode element = arrayNode.get(i);
                 TreeItem<String> childItem = buildTreeFromJson(element, "[" + i + "]");
                 treeItem.getChildren().add(childItem);
             }
+
+            // Add closing bracket as last child
+            treeItem.getChildren().add(new TreeItem<>("]"));
         } else if (jsonNode.isNull()) {
             // Null value
-            treeItem = new TreeItem<>(name + ": null");
+            treeItem = new TreeItem<>(quotedName + ": null");
         } else if (jsonNode.isBoolean()) {
             // Boolean value
-            treeItem = new TreeItem<>(name + ": " + jsonNode.asBoolean());
+            treeItem = new TreeItem<>(quotedName + ": " + jsonNode.asBoolean());
         } else if (jsonNode.isNumber()) {
             // Number value
-            treeItem = new TreeItem<>(name + ": " + jsonNode.asText());
+            treeItem = new TreeItem<>(quotedName + ": " + jsonNode.asText());
         } else {
             // String value
-            treeItem = new TreeItem<>(name + ": \"" + jsonNode.asText() + "\"");
+            treeItem = new TreeItem<>(quotedName + ": \"" + jsonNode.asText() + "\"");
         }
 
         return treeItem;
+    }
+
+    /**
+     * Wraps a key name in quotes unless it is already an array index like [0].
+     */
+    private String quoteKey(String name) {
+        if (name.startsWith("[")) {
+            return name;
+        }
+        return "\"" + name + "\"";
     }
 }
