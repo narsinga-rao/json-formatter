@@ -69,9 +69,11 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        // When expanded, label is just the name
-        assertEquals("root", treeItem.getValue());
-        assertEquals(2, treeItem.getChildren().size());
+        // When expanded, label shows opening brace
+        assertEquals("\"root\": {", treeItem.getValue());
+        // 2 fields + closing brace
+        assertEquals(3, treeItem.getChildren().size());
+        assertEquals("}", treeItem.getChildren().get(2).getValue());
     }
 
     @Test
@@ -82,12 +84,14 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        // When expanded, label is just the name
-        assertEquals("root", treeItem.getValue());
-        assertEquals(3, treeItem.getChildren().size());
+        // When expanded, label shows opening bracket
+        assertEquals("\"root\": [", treeItem.getValue());
+        // 3 items + closing bracket
+        assertEquals(4, treeItem.getChildren().size());
         assertEquals("[0]: 1", treeItem.getChildren().get(0).getValue());
         assertEquals("[1]: 2", treeItem.getChildren().get(1).getValue());
         assertEquals("[2]: 3", treeItem.getChildren().get(2).getValue());
+        assertEquals("]", treeItem.getChildren().get(3).getValue());
     }
 
     @Test
@@ -98,13 +102,15 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        // When expanded, label is just the name
-        assertEquals("root", treeItem.getValue());
-        assertEquals(1, treeItem.getChildren().size());
+        assertEquals("\"root\": {", treeItem.getValue());
+        // 1 field + closing brace
+        assertEquals(2, treeItem.getChildren().size());
         
         TreeItem<String> personItem = treeItem.getChildren().get(0);
-        assertEquals("person", personItem.getValue());
-        assertEquals(2, personItem.getChildren().size());
+        assertEquals("\"person\": {", personItem.getValue());
+        // 2 fields + closing brace
+        assertEquals(3, personItem.getChildren().size());
+        assertEquals("}", personItem.getChildren().get(2).getValue());
     }
 
     @Test
@@ -115,9 +121,10 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        assertEquals(4, treeItem.getChildren().size());
+        // 4 fields + closing brace
+        assertEquals(5, treeItem.getChildren().size());
         
-        // Check each primitive type
+        // Check each primitive type (keys are now quoted)
         boolean foundString = false;
         boolean foundNumber = false;
         boolean foundBoolean = false;
@@ -125,10 +132,10 @@ class JsonParserServiceTest {
         
         for (TreeItem<String> child : treeItem.getChildren()) {
             String value = child.getValue();
-            if (value.contains("string: \"hello\"")) foundString = true;
-            if (value.contains("number: 42")) foundNumber = true;
-            if (value.contains("boolean: true")) foundBoolean = true;
-            if (value.contains("nullValue: null")) foundNull = true;
+            if (value.contains("\"string\": \"hello\"")) foundString = true;
+            if (value.contains("\"number\": 42")) foundNumber = true;
+            if (value.contains("\"boolean\": true")) foundBoolean = true;
+            if (value.contains("\"nullValue\": null")) foundNull = true;
         }
         
         assertTrue(foundString, "String value not found");
@@ -145,17 +152,19 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
         
         assertNotNull(treeItem);
-        // When expanded, label is just the name
-        assertEquals("root", treeItem.getValue());
-        assertEquals(1, treeItem.getChildren().size());
+        assertEquals("\"root\": {", treeItem.getValue());
+        // 1 field + closing brace
+        assertEquals(2, treeItem.getChildren().size());
         
         TreeItem<String> usersItem = treeItem.getChildren().get(0);
-        assertEquals("users", usersItem.getValue());
-        assertEquals(2, usersItem.getChildren().size());
+        assertEquals("\"users\": [", usersItem.getValue());
+        // 2 items + closing bracket
+        assertEquals(3, usersItem.getChildren().size());
         
         TreeItem<String> firstUser = usersItem.getChildren().get(0);
-        assertEquals("[0]", firstUser.getValue());
-        assertEquals(2, firstUser.getChildren().size());
+        assertEquals("[0]: {", firstUser.getValue());
+        // 2 fields + closing brace
+        assertEquals(3, firstUser.getChildren().size());
     }
 
     @Test
@@ -165,13 +174,11 @@ class JsonParserServiceTest {
 
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
-        // Root object node should be expanded
         assertTrue(treeItem.isExpanded(), "Root object node should be expanded");
-        assertEquals("root", treeItem.getValue());
+        assertEquals("\"root\": {", treeItem.getValue());
 
-        // Nested object node should be expanded
         TreeItem<String> addressItem = treeItem.getChildren().get(1);
-        assertEquals("address", addressItem.getValue());
+        assertEquals("\"address\": {", addressItem.getValue());
         assertTrue(addressItem.isExpanded(), "Nested object node should be expanded");
     }
 
@@ -183,7 +190,7 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
         TreeItem<String> arrayItem = treeItem.getChildren().get(0);
-        assertEquals("items", arrayItem.getValue());
+        assertEquals("\"items\": [", arrayItem.getValue());
         assertTrue(arrayItem.isExpanded(), "Array node should be expanded");
     }
 
@@ -194,16 +201,16 @@ class JsonParserServiceTest {
 
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
-        // Initially expanded - label is just the name
-        assertEquals("root", treeItem.getValue());
+        // Initially expanded - shows opening brace
+        assertEquals("\"root\": {", treeItem.getValue());
 
         // Collapse the node - label should show prop count
         treeItem.setExpanded(false);
-        assertEquals("root: { 3 props }", treeItem.getValue());
+        assertEquals("\"root\": { 3 props }", treeItem.getValue());
 
-        // Expand again - label goes back to name
+        // Expand again - label goes back to opening brace
         treeItem.setExpanded(true);
-        assertEquals("root", treeItem.getValue());
+        assertEquals("\"root\": {", treeItem.getValue());
     }
 
     @Test
@@ -213,16 +220,16 @@ class JsonParserServiceTest {
 
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
-        // Initially expanded - label is just the name
-        assertEquals("root", treeItem.getValue());
+        // Initially expanded - shows opening bracket
+        assertEquals("\"root\": [", treeItem.getValue());
 
         // Collapse the node - label should show item count
         treeItem.setExpanded(false);
-        assertEquals("root: [ 5 items ]", treeItem.getValue());
+        assertEquals("\"root\": [ 5 items ]", treeItem.getValue());
 
-        // Expand again - label goes back to name
+        // Expand again - label goes back to opening bracket
         treeItem.setExpanded(true);
-        assertEquals("root", treeItem.getValue());
+        assertEquals("\"root\": [", treeItem.getValue());
     }
 
     @Test
@@ -233,10 +240,10 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
         TreeItem<String> personItem = treeItem.getChildren().get(0);
-        assertEquals("person", personItem.getValue());
+        assertEquals("\"person\": {", personItem.getValue());
 
         personItem.setExpanded(false);
-        assertEquals("person: { 2 props }", personItem.getValue());
+        assertEquals("\"person\": { 2 props }", personItem.getValue());
     }
 
     @Test
@@ -247,10 +254,10 @@ class JsonParserServiceTest {
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
         TreeItem<String> arrayItem = treeItem.getChildren().get(0);
-        assertEquals("items", arrayItem.getValue());
+        assertEquals("\"items\": [", arrayItem.getValue());
 
         arrayItem.setExpanded(false);
-        assertEquals("items: [ 3 items ]", arrayItem.getValue());
+        assertEquals("\"items\": [ 3 items ]", arrayItem.getValue());
     }
 
     @Test
@@ -260,19 +267,56 @@ class JsonParserServiceTest {
 
         TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
 
-        assertEquals("root", treeItem.getValue());
+        assertEquals("\"root\": {", treeItem.getValue());
 
         TreeItem<String> emptyObjItem = treeItem.getChildren().get(0);
-        assertEquals("emptyObj", emptyObjItem.getValue());
+        assertEquals("\"emptyObj\": {", emptyObjItem.getValue());
 
         TreeItem<String> emptyArrItem = treeItem.getChildren().get(1);
-        assertEquals("emptyArr", emptyArrItem.getValue());
+        assertEquals("\"emptyArr\": [", emptyArrItem.getValue());
 
         // Collapse to see counts
         emptyObjItem.setExpanded(false);
-        assertEquals("emptyObj: { 0 props }", emptyObjItem.getValue());
+        assertEquals("\"emptyObj\": { 0 props }", emptyObjItem.getValue());
 
         emptyArrItem.setExpanded(false);
-        assertEquals("emptyArr: [ 0 items ]", emptyArrItem.getValue());
+        assertEquals("\"emptyArr\": [ 0 items ]", emptyArrItem.getValue());
+    }
+
+    @Test
+    void testArrayIndexKeysNotQuoted() throws JsonProcessingException {
+        String json = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]";
+        JsonNode jsonNode = jsonParserService.parseJson(json);
+
+        TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
+
+        // Array index keys should not be quoted
+        TreeItem<String> firstItem = treeItem.getChildren().get(0);
+        assertEquals("[0]: {", firstItem.getValue());
+
+        TreeItem<String> secondItem = treeItem.getChildren().get(1);
+        assertEquals("[1]: {", secondItem.getValue());
+    }
+
+    @Test
+    void testClosingBracesAsLastChild() throws JsonProcessingException {
+        String json = "{\"list\":[1,2],\"obj\":{\"a\":1}}";
+        JsonNode jsonNode = jsonParserService.parseJson(json);
+
+        TreeItem<String> treeItem = jsonParserService.buildTreeFromJson(jsonNode);
+
+        // Root object should have closing brace
+        TreeItem<String> lastChild = treeItem.getChildren().get(treeItem.getChildren().size() - 1);
+        assertEquals("}", lastChild.getValue());
+
+        // Array should have closing bracket
+        TreeItem<String> listItem = treeItem.getChildren().get(0);
+        TreeItem<String> listLastChild = listItem.getChildren().get(listItem.getChildren().size() - 1);
+        assertEquals("]", listLastChild.getValue());
+
+        // Nested object should have closing brace
+        TreeItem<String> objItem = treeItem.getChildren().get(1);
+        TreeItem<String> objLastChild = objItem.getChildren().get(objItem.getChildren().size() - 1);
+        assertEquals("}", objLastChild.getValue());
     }
 }
